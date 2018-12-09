@@ -102,7 +102,6 @@ def gagnant(plateau):
     while i < len(plateau["cases"]):
         dico[plateau["cases"][i]] += 1
         i += 1
-    print(dico)
     if dico[1] > dico[2]:
         return 1
     elif dico[2] > dico[1]:
