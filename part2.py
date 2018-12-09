@@ -21,16 +21,18 @@ def prise_possible_direction(plateau, i, j, vertical, horizontal, joueur):
                 return False
     else:
         return False  # la case n'est pas valide
+    pion_adv = False
     while case_valide(plateau, i, j):  # si la case est valide
         if get_case(plateau, i, j) == pion_adverse(joueur):
             # la case suivante contient pion_adverse
             i = i - vertical
             j = j + horizontal  # coordonnee de la case suivante
+            pion_adv = True
         else:
             # la case suivante ne contient pas pion_adverse
-            return get_case(plateau, i, j) == joueur # True si c'est le joueur lui meme, False si la case est libre
+            return get_case(plateau, i, j) == joueur and pion_adv
+            # True si c'est le joueur lui meme, False si la case est libre
     return False
-
 
 def mouvement_valide(plateau, i, j, joueur):
     return (
@@ -92,6 +94,7 @@ def fin_de_partie(plateau):
 
 def gagnant(plateau):
     dico = {
+        0: 0,
         1: 0,
         2: 0
     }
@@ -99,9 +102,11 @@ def gagnant(plateau):
     while i < len(plateau["cases"]):
         dico[plateau["cases"][i]] += 1
         i += 1
+    print(dico)
     if dico[1] > dico[2]:
         return 1
     elif dico[2] > dico[1]:
         return 2
     else:
         return 0
+
