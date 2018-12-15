@@ -57,17 +57,8 @@ def afficher_plateau_simple(plateau):
 def afficher_plateau_moyen(plateau):
     n = plateau["n"]
 
-    ligne = "*"
-    i = 0
-    while i < n:
-        ligne += "********"
-        i += 1
-
-    point = "*"
-    i = 0
-    while i < n:
-        point += "       *"
-        i += 1
+    ligne = "*"+n*"********"
+    point = "*"+n*"       *"
 
     i = 0
     print(ligne)
@@ -94,23 +85,12 @@ def afficher_plateau_difficile(plateau):
     magenta = colored("       ", 'red', 'on_magenta')
     cyan = colored("       ", 'red', 'on_cyan')
 
-    ligne_pair = "  "
-    i = 0
-    while i < n:
-        if i % 2 == 0:
-            ligne_pair += magenta
-        else:
-            ligne_pair += cyan
-        i += 1
+    block_magenta_cyan = magenta+cyan
+    block_cyan_magenta = cyan+magenta
 
-    ligne_impair = "  "
-    i = 0
-    while i < n:
-        if i % 2 != 0:
-            ligne_impair += magenta
-        else:
-            ligne_impair += cyan
-        i += 1
+    ligne_pair = "  "+block_magenta_cyan*int(n/2)
+    ligne_impair = "  "+block_cyan_magenta*int(n/2)
+
 
     ligne_chiffre = "     "
     i = 0
