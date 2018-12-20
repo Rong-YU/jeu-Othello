@@ -2,11 +2,11 @@ from termcolor import *
 
 
 def indice_valide(plateau, indice):
-    return indice in range(0, plateau["n"])
+    return indice in range(0, plateau["n"])  # si l'indice est dans l'intervalle [0;n[
 
 
 def case_valide(plateau, i, j):
-    return indice_valide(plateau, i) and indice_valide(plateau, j)
+    return indice_valide(plateau, i) and indice_valide(plateau, j)  # si les deux indices sont valides
 
 
 def get_case(plateau, i, j):
@@ -30,7 +30,7 @@ def creer_plateau(n):
     while i < n * n:
         tab.append(0)
         i += 1
-    centre= (n - 1) // 2
+    centre = (n - 1) // 2
     indice = centre * n + centre
     tab[indice] = 2
     tab[indice + 1] = 1
@@ -56,10 +56,8 @@ def afficher_plateau_simple(plateau):
 
 def afficher_plateau_moyen(plateau):
     n = plateau["n"]
-
     ligne = "*"+n*"********"
     point = "*"+n*"       *"
-
     i = 0
     print(ligne)
     while i < n:
@@ -84,13 +82,11 @@ def afficher_plateau_difficile(plateau):
     n = plateau["n"]
     magenta = colored("       ", 'red', 'on_magenta')
     cyan = colored("       ", 'red', 'on_cyan')
-
     block_magenta_cyan = magenta+cyan
     block_cyan_magenta = cyan+magenta
 
     ligne_pair = "  "+block_magenta_cyan*int(n/2)
     ligne_impair = "  "+block_cyan_magenta*int(n/2)
-
 
     ligne_chiffre = "     "
     i = 0
@@ -101,21 +97,21 @@ def afficher_plateau_difficile(plateau):
 
     i = 0
     while i < n:
-        c = chr(97+i)+" "
+        c = chr(97+i)+" "  # la lettre correspond a la ligne
         j = 0
-        while j < n:
-            pion = '###'
-            couleur_pion = 'white'
+        while j < n:  # chaque ligne on doit afficher n cases
+            pion = '###'  # par defaut, le pion existe
+            couleur_pion = 'white'  # par defaut, le pion est blanc
             if get_case(plateau, i, j) == 1:
-                couleur_pion = 'grey'
+                couleur_pion = 'grey'  # si la case correspond au pion noir, change le couleur au gris
             elif get_case(plateau, i, j) == 0:
-                pion = '   '
-            if (i + j) % 2 == 0:
-                c += colored("  ", 'red', 'on_magenta')+colored(pion, couleur_pion, 'on_magenta')+colored("  ", 'red','on_magenta')
-            else:
-                c += colored("  ", 'red', 'on_cyan')+colored(pion, couleur_pion, 'on_cyan')+colored("  ", 'red', 'on_cyan')
+                pion = '   '  # si la case n'a pas de pion, n'affiche pas le pion
+            if (i + j) % 2 == 0:  # si les indices sont tous pair ou impair, la case est alors magenta
+                c += colored("  " + pion + "  ", couleur_pion, 'on_magenta')
+            else:  # si non la case est cyan
+                c += colored("  " + pion + "  ", couleur_pion, 'on_cyan')
             j += 1
-        if i % 2 == 0:
+        if i % 2 == 0:  # si la ligne est pair
             print(ligne_pair)
             print(c)
             print(ligne_pair)
@@ -150,17 +146,57 @@ def test_case_valide():
 def test_get_case():
     p = creer_plateau(4)
     assert get_case(p, 0, 0) == 0
-    assert not get_case(p, 0, 3) == 1
-    # assert not get_case(p, 0, 4) == 0
+    assert not get_case(p, 0, 0) == 1
     print("get_case √")
 
 
 def test_set_case():
     p = creer_plateau(4)
-    set_case(p, 0, 0, 3)
-    assert get_case(p, 0, 0) == 3
-    assert not get_case(p, 0, 3) == 1
+    set_case(p, 0, 0, 2)
+    assert get_case(p, 0, 0) == 2
+    set_case(p, 0, 0, 0)
+    assert not get_case(p, 0, 0) == 2
     print("set_case √")
+
+
+def test_creer_plateau():
+    p = creer_plateau(4)
+    assert len(p["cases"]) == 16
+    assert p["n"] == 4
+    p = creer_plateau(6)
+    assert len(p["cases"]) == 36
+    assert p["n"] == 6
+    p = creer_plateau(8)
+    assert len(p["cases"]) == 64
+    assert p["n"] == 8
+    print("creer_plateau √")
+
+
+def test_afficher_plateau_simple():
+    p = creer_plateau(4)
+    afficher_plateau_simple(p)
+    p = creer_plateau(6)
+    afficher_plateau_simple(p)
+    p = creer_plateau(8)
+    afficher_plateau_simple(p)
+
+
+def test_afficher_plateau_moyen():
+    p = creer_plateau(4)
+    afficher_plateau_moyen(p)
+    p = creer_plateau(6)
+    afficher_plateau_moyen(p)
+    p = creer_plateau(8)
+    afficher_plateau_moyen(p)
+
+
+def test_afficher_plateau_difficile():
+    p = creer_plateau(4)
+    afficher_plateau_difficile(p)
+    p = creer_plateau(6)
+    afficher_plateau_difficile(p)
+    p = creer_plateau(8)
+    afficher_plateau_difficile(p)
 
 
 if __name__ == '__main__':
@@ -168,3 +204,7 @@ if __name__ == '__main__':
     test_case_valide()
     test_get_case()
     test_set_case()
+    test_creer_plateau()
+    test_afficher_plateau_simple()
+    test_afficher_plateau_moyen()
+    test_afficher_plateau_difficile()
