@@ -9,38 +9,43 @@ def pion_adverse(n):
 
 
 def prise_possible_direction(plateau, i, j, vertical, horizontal, joueur):
-    pion_adv = False
+    if not case_valide(plateau, i, j) or get_case(plateau, i, j) == 0:
+        return 0
+    nb = 0
     while case_valide(plateau, i, j):  # si la case est valide
         i = i - vertical
         j = j + horizontal  # i, j de la case suivante
         if case_valide(plateau, i, j):  # si la case suivante est toujours valide
             if get_case(plateau, i, j) == pion_adverse(joueur):
                 # la case suivante contient pion_adverse
-                pion_adv = True
+                nb += 1
             else:
-                # la case suivante ne contient pas pion_adverse
-                return get_case(plateau, i, j) == joueur and pion_adv
+                if get_case(plateau, i, j) == joueur:
+                    # la case suivante ne contient pas pion_adverse
+                    return nb
+                else:
+                    return 0
                 # True si c'est le joueur lui meme et on a trouve un pion adversaire dans cette direction
                 # False si la case est libre ou on n'a pas trouve un pion adversaire
-    return False
+    return 0
 
 
 def mouvement_valide(plateau, i, j, joueur):
     # test pour tous les 8 directions
-    return (
-        prise_possible_direction(plateau, i, j, 0, -1, joueur) or
-        prise_possible_direction(plateau, i, j, 1, -1, joueur) or
-        prise_possible_direction(plateau, i, j, 1, 0, joueur) or
-        prise_possible_direction(plateau, i, j, 1, 1, joueur) or
-        prise_possible_direction(plateau, i, j, 0, 1, joueur) or
-        prise_possible_direction(plateau, i, j, -1, 1, joueur) or
-        prise_possible_direction(plateau, i, j, -1, 0, joueur) or
-        prise_possible_direction(plateau, i, j, -1, -1, joueur)
-    )
+    nb = 0
+    nb += prise_possible_direction(plateau, i, j, 0, -1, joueur)
+    nb += prise_possible_direction(plateau, i, j, 1, -1, joueur)
+    nb += prise_possible_direction(plateau, i, j, 1, 0, joueur)
+    nb += prise_possible_direction(plateau, i, j, 1, 1, joueur)
+    nb += prise_possible_direction(plateau, i, j, 0, 1, joueur)
+    nb += prise_possible_direction(plateau, i, j, -1, 1, joueur)
+    nb += prise_possible_direction(plateau, i, j, -1, 0, joueur)
+    nb += prise_possible_direction(plateau, i, j, -1, -1, joueur)
+    return nb
 
 
 def mouvement_direction(plateau, i, j, vertical, horizontal, joueur):
-    if not prise_possible_direction(plateau, i, j, vertical, horizontal, joueur):
+    if prise_possible_direction(plateau, i, j, vertical, horizontal, joueur) == 0:
         # cette direction n'est pas valide
         return
     i = i-vertical
@@ -55,32 +60,46 @@ def mouvement_direction(plateau, i, j, vertical, horizontal, joueur):
 
 
 def mouvement(plateau, i, j, joueur):
-    mouvement_direction(plateau, i, j, 0, -1, joueur)
-    mouvement_direction(plateau, i, j, 1, -1, joueur)
-    mouvement_direction(plateau, i, j, 1, 0, joueur)
-    mouvement_direction(plateau, i, j, 1, 1, joueur)
-    mouvement_direction(plateau, i, j, 0, 1, joueur)
-    mouvement_direction(plateau, i, j, -1, 1, joueur)
-    mouvement_direction(plateau, i, j, -1, 0, joueur)
-    mouvement_direction(plateau, i, j, -1, -1, joueur)
-    set_case(plateau, i, j, joueur)
+    if mouvement_valide(plateau, i, j, joueur) > 0:
+        mouvement_direction(plateau, i, j, 0, -1, joueur)
+        mouvement_direction(plateau, i, j, 1, -1, joueur)
+        mouvement_direction(plateau, i, j, 1, 0, joueur)
+        mouvement_direction(plateau, i, j, 1, 1, joueur)
+        mouvement_direction(plateau, i, j, 0, 1, joueur)
+        mouvement_direction(plateau, i, j, -1, 1, joueur)
+        mouvement_direction(plateau, i, j, -1, 0, joueur)
+        mouvement_direction(plateau, i, j, -1, -1, joueur)
+        set_case(plateau, i, j, joueur)
 
 
 def joueur_peut_jouer(plateau, joueur):
     n = plateau["n"]
+    tab_coord = []
+    coord = {"coord": [],
+             "nb": 0
+             }
     i = 0
     while i < n:
         j = 0
         while j < n:
-            if mouvement_valide(plateau, i, j, joueur):
-                return True  # des qu'on trouve une case valide, return True
+            nb = mouvement_valide(plateau, i, j, joueur)
+            if nb > 0:
+                coord["coord"] = [i, j]
+                coord["nb"] = nb
+                tab_coord.append(coord)
+                coord = {"coord": [],
+                         "nb": 0
+                         }
             j += 1
         i += 1
-    return False  # la fonction a teste tous les cases possible mais il n'y a aucune cases valide
+
+    if not tab_coord:
+        return 0
+    return tab_coord
 
 
 def fin_de_partie(plateau):
-    return not(joueur_peut_jouer(plateau, 1) or joueur_peut_jouer(plateau, 2))
+    return not(joueur_peut_jouer(plateau, 1) != 0 or joueur_peut_jouer(plateau, 2) != 0)
 
 
 def gagnant(plateau):
@@ -118,12 +137,12 @@ def test_prise_possible_direction():
     set_case(p, 4, 1, 1)
     set_case(p, 4, 2, 1)
     set_case(p, 4, 3, 1)
-    assert prise_possible_direction(p, 4, 4, 1, 0, 2)
-    assert prise_possible_direction(p, 4, 4, 0, -1, 2)
-    assert prise_possible_direction(p, 4, 4, 1, -1, 2)
-    assert not prise_possible_direction(p, 4, 4, -1, 0, 2)
-    assert not prise_possible_direction(p, 4, 4, -1, 1, 2)
-    assert not prise_possible_direction(p, 4, 4, 1, 1, 2)
+    assert prise_possible_direction(p, 4, 4, 1, 0, 2) > 0
+    assert prise_possible_direction(p, 4, 4, 0, -1, 2) > 0
+    assert prise_possible_direction(p, 4, 4, 1, -1, 2) > 0
+    assert not prise_possible_direction(p, 4, 4, -1, 0, 2) > 0
+    assert not prise_possible_direction(p, 4, 4, -1, 1, 2) > 0
+    assert not prise_possible_direction(p, 4, 4, 1, 1, 2) > 0
 
 
 def test_mouvement_valide():
@@ -138,12 +157,12 @@ def test_mouvement_valide():
     set_case(p, 4, 1, 1)
     set_case(p, 4, 2, 1)
     set_case(p, 4, 3, 1)
-    assert mouvement_valide(p, 4, 4, 2)
-    assert not mouvement_valide(p, 4, 4, 1)
-    assert mouvement_valide(p, 2, 1, 1)
-    assert not mouvement_valide(p, 2, 1, 2)
-    assert mouvement_valide(p, 2, 5, 2)
-    assert not mouvement_valide(p, 2, 5, 1)
+    assert mouvement_valide(p, 4, 4, 2) > 0
+    assert not mouvement_valide(p, 4, 4, 1) > 0
+    assert mouvement_valide(p, 2, 1, 1) > 0
+    assert not mouvement_valide(p, 2, 1, 2) > 0
+    assert mouvement_valide(p, 2, 5, 2) > 0
+    assert not mouvement_valide(p, 2, 5, 1) > 0
 
 
 def test_mouvement_direction():
@@ -205,11 +224,11 @@ def test_mouvement():
 
 def test_joueur_peut_jouer():
     p = creer_plateau(4)
-    assert joueur_peut_jouer(p, 1)  # retourne True
+    assert joueur_peut_jouer(p, 1) != 0  # retourne True
     # On remplace les pions du joueur 2 par des pions du joueur 1
     set_case(p, 1, 1, 1)
     set_case(p, 2, 2, 1)
-    assert not joueur_peut_jouer(p, 1)  # retourne False
+    assert not joueur_peut_jouer(p, 1) != 0  # retourne False
 
 
 def test_fin_de_partie():
