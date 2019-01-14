@@ -9,7 +9,7 @@ def pion_adverse(n):
 
 
 def prise_possible_direction(plateau, i, j, vertical, horizontal, joueur):
-    if not case_valide(plateau, i, j) or get_case(plateau, i, j) == 0:
+    if not case_valide(plateau, i, j) or get_case(plateau, i, j) != 0:
         return 0
     nb = 0
     while case_valide(plateau, i, j):  # si la case est valide
@@ -92,14 +92,13 @@ def joueur_peut_jouer(plateau, joueur):
                          }
             j += 1
         i += 1
-
     if not tab_coord:
         return 0
     return tab_coord
 
 
 def fin_de_partie(plateau):
-    return not(joueur_peut_jouer(plateau, 1) != 0 or joueur_peut_jouer(plateau, 2) != 0)
+    return joueur_peut_jouer(plateau, 1) == 0 and joueur_peut_jouer(plateau, 2) == 0
 
 
 def gagnant(plateau):
