@@ -11,14 +11,16 @@ def creer_partie(n):
 
 
 def saisie_valide(partie, s):
-    if s == "m":
+    if s == "m" or s == "y":
         return True
     s = s.lower()
-    if len(s) != 2:
+    if len(s) == 2:
         if not("a" <= s[0] <= "z" and s[1].isdigit()):
             # la premiere caractere n'est pas une lettre ou la deuxieme n'est pas un chiffre
             # ou la chaine contient pas seulement deux caractere.
             return False
+    else:
+        return False
     i = ord(s[0])-97  # ex: a=0
     j = int(s[1])-1  # ex: 1=0
     if mouvement_valide(partie["plateau"], i, j, partie["joueur"]) == 0:
@@ -38,9 +40,9 @@ def tour_jeu(partie):
     afficher_plateau_difficile(partie["plateau"])
     # afficher_plateau_simple(partie["plateau"])
     if partie["joueur"] == 1:
-        print("pion_noir")
+        print("C'est le tour du pion_blanc")
     else:
-        print("pion_blanc")
+        print("C'est le tour du pion_noir")
 
     indice_max = 0
     i = 0
@@ -50,19 +52,24 @@ def tour_jeu(partie):
         i += 1
     coordonnes = coord[indice_max]["coord"]
     i = chr(coordonnes[0]+97)
-    j = coordonnes[1]+1
-    print("IA suggere que a la case", i, j, "vous pouvez manger", coord[indice_max]["nb"], "pions")
+    j = str(coordonnes[1]+1)
+    print("sur la case", i + j, "vous pouvez manger", coord[indice_max]["nb"], "pions")
 
     s = ""
-    print("saisir un mouvement(ex:B3),ou la lettre M pour accéder au menu principal")
+    print("saisir un mouvement(ex:B3),ou la lettre M pour accéder au menu principal ou Y pour accepter le conseil")
     while s == "" or not(saisie_valide(partie, s)):
         s = input()
         s = s.lower()
     if s == "m":
         return False
-    i = ord(s[0])-97
-    j = int(s[1])-1
+    if s == "y":
+        i = coordonnes[0]
+        j = coordonnes[1]
+    else:
+        i = ord(s[0])-97
+        j = int(s[1])-1
     mouvement(partie["plateau"], i, j, partie["joueur"])
+    partie["joueur"] = pion_adverse(partie["joueur"])
     return True
 
 
@@ -92,13 +99,13 @@ def jouer(partie):
     while not fin_de_partie(partie["plateau"]):
         if not tour_jeu(partie):
             return False
-        partie["joueur"] = pion_adverse(partie["joueur"])
+
 
     # os.system('clear')  # linux
     os.system('cls')  # pour Windows
     afficher_plateau_difficile(partie["plateau"])
-    afficher_plateau_simple(partie["plateau"])
-    print(partie)
+    # afficher_plateau_simple(partie["plateau"])
+
     return True
 
 
