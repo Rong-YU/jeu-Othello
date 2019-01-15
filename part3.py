@@ -11,27 +11,26 @@ def creer_partie(n):
 
 
 def saisie_valide(partie, s):
+    s = s.lower()
     if s == "m" or s == "y":
         return True
-    s = s.lower()
-    if len(s) == 2:
+    if len(s) == 2:  # si la chaine contient seulement deux caractere.
         if not("a" <= s[0] <= "z" and s[1].isdigit()):
             # la premiere caractere n'est pas une lettre ou la deuxieme n'est pas un chiffre
-            # ou la chaine contient pas seulement deux caractere.
             return False
     else:
         return False
     i = ord(s[0])-97  # ex: a=0
     j = int(s[1])-1  # ex: 1=0
-    if mouvement_valide(partie["plateau"], i, j, partie["joueur"]) == 0:
+    if mouvement_valide(partie["plateau"], i, j, partie["joueur"]) == 0:  # verifier si le mouvement est valide
         print("Case non valide!")
         return False
     return True
 
 
 def tour_jeu(partie):
-    coord = joueur_peut_jouer(partie["plateau"], partie["joueur"])
-    if coord == 0:
+    coord = joueur_peut_jouer(partie["plateau"], partie["joueur"])  # les coordonnees de mouvement valide
+    if coord == 0:  # si y a pas de mouvement valide
         print("joueur", partie["joueur"], "n'a pas de case disponible pour jouer")
         partie["joueur"] = pion_adverse(partie["joueur"])
         return True
@@ -44,14 +43,14 @@ def tour_jeu(partie):
     else:
         print("C'est le tour du pion_noir")
 
-    indice_max = 0
+    indice_max = 0  # trouver la case ou le joueur peut manger le plus de pion
     i = 0
     while i < len(coord):
         if coord[i]["nb"] > coord[indice_max]["nb"]:
             indice_max = i
         i += 1
-    coordonnes = coord[indice_max]["coord"]
-    i = chr(coordonnes[0]+97)
+    coordonnes = coord[indice_max]["coord"]   # les coordonnes de la case ou on peut manger le plus de pion
+    i = chr(coordonnes[0]+97).upper()
     j = str(coordonnes[1]+1)
     print("sur la case", i + j, "vous pouvez manger", coord[indice_max]["nb"], "pions")
 
@@ -59,17 +58,17 @@ def tour_jeu(partie):
     print("saisir un mouvement(ex:B3),ou la lettre M pour accéder au menu principal ou Y pour accepter le conseil")
     while s == "" or not(saisie_valide(partie, s)):
         s = input()
-        s = s.lower()
+    s = s.lower()  # pour faciliter la calcule ASCII d'apres
     if s == "m":
         return False
-    if s == "y":
+    if s == "y":  # si le joueur accepter le conseil
         i = coordonnes[0]
         j = coordonnes[1]
-    else:
+    else:  # si le joueur a choisi une case par luimeme
         i = ord(s[0])-97
         j = int(s[1])-1
-    mouvement(partie["plateau"], i, j, partie["joueur"])
-    partie["joueur"] = pion_adverse(partie["joueur"])
+    mouvement(partie["plateau"], i, j, partie["joueur"])  # effectuer le mouvement
+    partie["joueur"] = pion_adverse(partie["joueur"])  # changer le joueur pour le tour suivant
     return True
 
 
@@ -96,11 +95,13 @@ def saisir_action(partie=None):
 
 
 def jouer(partie):
-    while not fin_de_partie(partie["plateau"]):
-        if not tour_jeu(partie):
+    while not fin_de_partie(partie["plateau"]):  # tant que la partie n'est pas terminee
+        if not tour_jeu(partie):  # appel la fonction tour_jeu
+            # la fonction renvoi false seulement le joueur courant souhaite retourner au menu principal
             return False
+        # si non le mouvement doit etre effectue, et fait rien.
 
-
+    # la partie est terminee, afficher la plateau
     # os.system('clear')  # linux
     os.system('cls')  # pour Windows
     afficher_plateau_difficile(partie["plateau"])
@@ -149,8 +150,8 @@ def othello():
         partie = charger_partie()
 
     while True:
-        a = jouer(partie)
-        if not a:
+        if not jouer(partie):
+            # False = la partie s'est terminée car l'un des joueurs a souhaité accéder au menu principal
             action = saisir_action(partie)
             if action == "0":
                 return
@@ -166,7 +167,7 @@ def othello():
                 return
             elif action == 4:
                 continue
-        else:
+        else:  # True = la partie est finalement terminée
             n = gagnant(partie["plateau"])
             if n == 1:
                 print("joueur 1 a gagne")
@@ -175,3 +176,54 @@ def othello():
             else:
                 print("egalite")
             return
+
+
+def test_creer_partie():
+    p = creer_partie(4)
+    plateau = creer_plateau(4)
+    assert p == {"plateau": plateau, "joueur": 1}
+    p = creer_partie(6)
+    plateau = creer_plateau(6)
+    assert p == {"plateau": plateau, "joueur": 1}
+    p = creer_partie(8)
+    plateau = creer_plateau(8)
+    assert p == {"plateau": plateau, "joueur": 1}
+
+
+def test_saisie_valide():
+    p = creer_partie(4)
+    s = "m"
+    assert saisie_valide(p, s)
+    s = "M"
+    assert saisie_valide(p, s)
+    s = "y"
+    assert saisie_valide(p, s)
+    s = "Y"
+    assert saisie_valide(p, s)
+    s = "b1"
+    assert saisie_valide(p, s)
+    s = "E1"
+    assert not saisie_valide(p, s)
+
+
+def test_charger_partie():
+    partie = creer_partie(4)
+    sauvegarder_partie(partie)
+    partie1 = charger_partie()
+    assert partie == partie1
+    os.remove("sauvegarde_partie.json")
+
+
+def test_sauvegarder_partie():
+    partie = creer_partie(4)
+    assert not os.path.exists("sauvegarde_partie.json")
+    sauvegarder_partie(partie)
+    assert os.path.exists("sauvegarde_partie.json")
+    os.remove("sauvegarde_partie.json")
+
+
+if __name__ == '__main__':
+    test_saisie_valide()
+    test_creer_partie()
+    test_charger_partie()
+    test_sauvegarder_partie()
