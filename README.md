@@ -4,5 +4,5 @@ Jeu Othello réalisé avec Python, dans le cadre du projet tutoré lors de mon p
 ## Pour lancer le jeu
 
 ```python
-python3 hello.py
+python3 game.py
 ```
